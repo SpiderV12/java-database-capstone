@@ -1,43 +1,79 @@
-# Smart Clinic – Schema & Architecture
+# Smart Clinic System – Database Design
 
-## 1) Architecture Summary
+## 1. MySQL Database Design
 
-يعتمد النظام على معمارية ثلاثية الطبقات (Presentation / Application / Data) باستخدام Spring Boot. واجهة العرض تقدّم لوحتَي تحكم HTML عبر **Thymeleaf MVC** (Controllers من نوع Web/MVC) وكذلك **REST APIs** (Controllers من نوع REST) لاستهلاكها من SPA/موبايل. طبقة التطبيق تحتوي **Services** مسؤولة عن منطق الأعمال والتحقق والتعاملات (transactions). طبقة البيانات تستخدم **MySQL** للبيانات العلائقية عبر **Spring Data JPA** (كيانات Entities ومستودعات Repositories) و**MongoDB** للبيانات المرنة/غير المهيكلة عبر **Spring Data MongoDB** (وثائق Documents ومستودعات Mongo). تنظيم الحزم المقترح:  
-`controller.web` لصفحات Thymeleaf، `controller.api` لنقاط REST، `service` للمنطق، `repository.jpa` و`repository.mongo` للوصول للبيانات، و`model.entity` (JPA) و`model.document` (Mongo).
+The relational database will store structured data such as patients, doctors, appointments, and admin users.
 
-## 2) Numbered Flow – Request/Response
+### 1.1 Table: patients
+| Column Name       | Data Type       | Constraints                  |
+|------------------|----------------|------------------------------|
+| patient_id        | INT            | PRIMARY KEY, AUTO_INCREMENT  |
+| first_name        | VARCHAR(50)    | NOT NULL                     |
+| last_name         | VARCHAR(50)    | NOT NULL                     |
+| email             | VARCHAR(100)   | NOT NULL, UNIQUE             |
+| phone_number      | VARCHAR(20)    | NULL                         |
+| date_of_birth     | DATE           | NULL                         |
+| created_at        | TIMESTAMP      | DEFAULT CURRENT_TIMESTAMP    |
 
-### A) تدفّق لوحات HTML (Thymeleaf MVC)
+### 1.2 Table: doctors
+| Column Name       | Data Type       | Constraints                  |
+|------------------|----------------|------------------------------|
+| doctor_id         | INT            | PRIMARY KEY, AUTO_INCREMENT  |
+| first_name        | VARCHAR(50)    | NOT NULL                     |
+| last_name         | VARCHAR(50)    | NOT NULL                     |
+| specialty         | VARCHAR(100)   | NOT NULL                     |
+| email             | VARCHAR(100)   | NOT NULL, UNIQUE             |
+| phone_number      | VARCHAR(20)    | NULL                         |
+| created_at        | TIMESTAMP      | DEFAULT CURRENT_TIMESTAMP    |
 
-1. **المستخدم/المتصفح** يطلب صفحة (GET) مثل `/dashboard/appointments`.
-2. يصل الطلب إلى **MVC Controller** داخل `controller.web.*` (مثل `DashboardController`).
-3. يستدعي الـController طبقة **Service** المناسبة (مثل `AppointmentService`) مع المعايير.
-4. تقوم الـService بالتحقق من المدخلات، إدارة **الترانزاكشن** عند الحاجة، واستدعاء المستودعات:
-   - إن كان الطلب بيانات علائقية (مواعيد/أطباء/مرضى) → تستدعي **JPA Repository** داخل `repository.jpa.*` (MySQL).
-   - إن كان الطلب بيانات مرنة (وصفات/ملاحظات/سجلات) → تستدعي **Mongo Repository** داخل `repository.mongo.*` (MongoDB).
-5. **JPA** يولّد استعلامات SQL إلى **MySQL** (علاقات، قيود، join…)، و**Spring Data MongoDB** يرسل عمليات CRUD إلى **MongoDB** (وثائق/مصفوفات).
-6. تعيد المستودعات النتائج إلى الـService، التي تجمع/تحوّل البيانات إلى **View Model**.
-7. يعيد الـController **ModelAndView** إلى قالب **Thymeleaf** (مثل `appointments.html`).
-8. يتم **Render** الصفحة وإرجاع **HTTP 200 + HTML** للمتصفح.
+### 1.3 Table: appointments
+| Column Name       | Data Type       | Constraints                      |
+|------------------|----------------|----------------------------------|
+| appointment_id    | INT            | PRIMARY KEY, AUTO_INCREMENT      |
+| patient_id        | INT            | FOREIGN KEY REFERENCES patients(patient_id) |
+| doctor_id         | INT            | FOREIGN KEY REFERENCES doctors(doctor_id) |
+| appointment_date  | DATETIME       | NOT NULL                         |
+| status            | VARCHAR(20)    | DEFAULT 'Scheduled'              |
+| notes             | TEXT           | NULL                             |
 
-### B) تدفّق REST API (لـ SPA/موبايل/تكامل خارجي)
-
-1. **عميل REST** يرسل طلبًا (مثلاً: `POST /api/appointments`) مع JSON.
-2. يصل الطلب إلى **REST Controller** داخل `controller.api.*` (مثل `AppointmentApiController`)، تُطبّق **Validation** (@Valid).
-3. يستدعي الـController طبقة **Service** لإجراء منطق الأعمال (التحقق من التعارض، صلاحيات، قواعد المجال).
-4. تقوم الـService بالتعامل مع طبقة البيانات:
-   - إنشاء/تحديث كيانات عبر **JPA Repositories** → تخزين في **MySQL**.
-   - عند الحاجة، إنشاء/قراءة وثائق مرتبطة (مثل وصفة مرتبطة بموعد) عبر **Mongo Repositories** → **MongoDB**.
-5. تُدار **المعاملة (Transaction)** حول عمليات MySQL (ويمكن استخدام outbox/أحداث للتنسيق مع Mongo عند السيناريوهات المعقدة).
-6. تعود النتائج إلى الـController على شكل DTOs.
-7. يعيد الـController **HTTP Response** (مثلاً 201 Created أو 200 OK) مع **JSON** قياسي.
-8. يقوم العميل بتحديث واجهته اعتمادًا على الاستجابة.
-
-> تكامل البيانات:
->
-> - **MySQL عبر JPA**: كيانات مثل `Patient`, `Doctor`, `Appointment`, `Admin` تُخزن بعلاقات واضحة ومفاتيح خارجية.
-> - **MongoDB عبر Spring Data**: وثائق مثل `Prescription`, `Feedback`, `Logs` تُخزن مرنًا بمصفوفات/كائنات متداخلة، ويمكن حفظ مراجع `appointmentId`/`patientId` للربط المنطقي.
+### 1.4 Table: admin
+| Column Name       | Data Type       | Constraints                  |
+|------------------|----------------|------------------------------|
+| admin_id          | INT            | PRIMARY KEY, AUTO_INCREMENT  |
+| username          | VARCHAR(50)    | NOT NULL, UNIQUE             |
+| password_hash     | VARCHAR(255)   | NOT NULL                     |
+| email             | VARCHAR(100)   | NOT NULL, UNIQUE             |
+| created_at        | TIMESTAMP      | DEFAULT CURRENT_TIMESTAMP    |
 
 ---
 
-**Author(s):** IBM Skills Network Team
+## 2. MongoDB Collection Design
+
+The document-based database will store flexible or nested data such as prescriptions, feedback, and logs.
+
+### 2.1 Collection: prescriptions
+
+**Example Document:**
+
+```json
+{
+  "_id": "64f2b3c7a1f3e2b4d7c6e5a1",
+  "patient_id": 1,
+  "doctor_id": 2,
+  "date_issued": "2025-08-27T09:30:00Z",
+  "medications": [
+    {
+      "name": "Amoxicillin",
+      "dosage": "500mg",
+      "frequency": "3 times a day",
+      "duration_days": 7
+    },
+    {
+      "name": "Paracetamol",
+      "dosage": "500mg",
+      "frequency": "as needed",
+      "duration_days": 5
+    }
+  ],
+  "notes": "Take medications with food. Follow-up in one week."
+}
