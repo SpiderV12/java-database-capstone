@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/assets/css/doctorDashboard.css}">
+</head>
+<body>
+<div id="doctorHeader"></div>
+
+<input type="text" id="appointmentSearch" placeholder="Search appointments by patient...">
+<input type="date" id="appointmentDateFilter">
+
+<div id="appointmentList"></div>
+
+<script src="/static/js/components/header.js"></script>
+<script src="/static/js/components/modal.js"></script>
+<script src="/static/js/services/patientService.js"></script>
+<script src="/static/js/doctorDashboard.js"></script>
+</body>
+</html>

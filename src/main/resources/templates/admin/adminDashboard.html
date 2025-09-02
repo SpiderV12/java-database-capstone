@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/assets/css/adminDashboard.css}">
+</head>
+<body>
+<div id="adminHeader"></div>
+
+<input type="text" id="doctorSearch" placeholder="Search doctors by name...">
+<select id="specialtyFilter">
+    <option value="">All Specialties</option>
+    <option value="Cardiology">Cardiology</option>
+    <option value="Dermatology">Dermatology</option>
+</select>
+
+<div id="doctorList"></div>
+
+<button id="addDoctorBtn">Add Doctor</button>
+<div id="addDoctorModal"></div>
+
+<script src="/static/js/components/header.js"></script>
+<script src="/static/js/components/modal.js"></script>
+<script src="/static/js/services/doctorService.js"></script>
+<script src="/static/js/adminDashboard.js"></script>
+</body>
+</html>
