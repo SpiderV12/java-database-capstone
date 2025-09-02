@@ -4,7 +4,6 @@ package com.example.Smart_Clinic.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jetbrains.annotations.NotNull;
 
 @Entity
 public class Admin {
