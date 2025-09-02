@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>بوابة المريض - البحث عن طبيب</title>
+    <style>
+        body {
+            font-family: "Tahoma", sans-serif;
+            background: #f0f8ff;
+            direction: rtl;
+            text-align: center;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-right: 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #004d40;
+        }
+        table {
+            margin: 30px auto;
+            border-collapse: collapse;
+            width: 70%;
+        }
+        table, th, td {
+            border: 1px solid #888;
+        }
+        th, td {
+            padding: 12px;
+        }
+        th {
+            background-color: #00796b;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>بوابة المريض</h2>
+    <h3>البحث عن طبيب</h3>
+
+    <!-- نموذج البحث -->
+    <form th:action="@{/patient/search}" method="get">
+        <input type="text" name="query" placeholder="ادخل اسم الطبيب أو التخصص" required>
+        <button type="submit">بحث</button>
+    </form>
+
+    <!-- مثال ثابت للنتيجة -->
+    <div th:if="${query != null}">
+        <h4>نتائج البحث عن: "<span th:text="${query}"></span>"</h4>
+
+        <table>
+            <thead>
+            <tr>
+                <th>اسم الطبيب</th>
+                <th>التخصص</th>
+                <th>المستشفى</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- مثال ثابت يظهر دائما -->
+            <tr>
+                <td>د. أحمد علي</td>
+                <td>طب الأسرة</td>
+                <td>مستشفى المدينة</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

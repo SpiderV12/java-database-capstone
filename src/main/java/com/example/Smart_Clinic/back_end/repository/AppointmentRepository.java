@@ -8,5 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
-    List<Appointment> findByDoctorIdAndAppointmentDateBetween(Long doctorId, LocalDateTime start, LocalDateTime end);
-}
+    List<Appointment> findByDoctorDoctorIdAndAppointmentDateBetween(
+            Long doctorId,
+            LocalDateTime start,
+            LocalDateTime end
+    );}

@@ -18,6 +18,8 @@ public class AuthService {
         // مثال ثابت: يمكن ربطه بالـ JWT parsing
         if (token.equals("admin-token")) return "ADMIN";
         if (token.equals("doctor-token")) return "DOCTOR";
+        if (token.equals("pacint-token")) return "PACHI";
+
         return "UNKNOWN";
     }
 }

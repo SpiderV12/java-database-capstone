@@ -15,7 +15,7 @@ public class AppointmentService {
     private AppointmentRepository appointmentRepository;
 
     public List<Appointment> getAppointmentsByDoctor(Long doctorId, LocalDateTime start, LocalDateTime end) {
-        return appointmentRepository.findByDoctorIdAndAppointmentDateBetween(doctorId, start, end);
+        return appointmentRepository.findByDoctorDoctorIdAndAppointmentDateBetween(doctorId, start, end);
     }
 
     public Appointment saveAppointment(Appointment appointment) {

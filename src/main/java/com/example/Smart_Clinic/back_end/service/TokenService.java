@@ -12,6 +12,6 @@ public class TokenService {
 
     public String getRoleFromToken(String token) {
         // استخرج الدور من التوكن
-        return "DOCTOR"; // مثال ثابت
+        return token; // مثال ثابت
     }
 }

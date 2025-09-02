@@ -1,19 +1,92 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <title>لوحة الطبيب</title>
     <link rel="stylesheet" th:href="@{/assets/css/doctorDashboard.css}">
+    <style>
+        body { font-family: "Tahoma", sans-serif; direction: rtl; }
+        #filters { margin: 20px; text-align: center; }
+        input { padding: 8px; margin: 5px; }
+        table { width: 90%; margin: 20px auto; border-collapse: collapse; }
+        th, td { border: 1px solid #888; padding: 10px; text-align: center; }
+        th { background: #00796b; color: #fff; }
+    </style>
 </head>
 <body>
 <div id="doctorHeader"></div>
 
-<input type="text" id="appointmentSearch" placeholder="Search appointments by patient...">
-<input type="date" id="appointmentDateFilter">
+<div id="filters">
+    <input type="text" id="appointmentSearch" placeholder="ابحث عن مريض بالاسم...">
+    <input type="date" id="appointmentDateFilter">
+</div>
 
-<div id="appointmentList"></div>
+<div id="appointmentList">
+    <table>
+        <thead>
+        <tr>
+            <th>اسم المريض</th>
+            <th>التاريخ</th>
+            <th>الوقت</th>
+            <th>التخصص</th>
+        </tr>
+        </thead>
+        <tbody id="appointmentTableBody">
+        <!-- يتم ملء البيانات بالـ JS -->
+        </tbody>
+    </table>
+</div>
 
-<script src="/static/js/components/header.js"></script>
-<script src="/static/js/components/modal.js"></script>
-<script src="/static/js/services/patientService.js"></script>
-<script src="/static/js/doctorDashboard.js"></script>
+<script>
+    // بيانات ثابتة (ممكن تجيبها لاحقاً من patientService.js)
+    const appointments = [
+        { name: "محمد علي", date: "2025-09-05", time: "10:00", specialty: "طب الأسرة" },
+        { name: "أحمد حسن", date: "2025-09-05", time: "11:30", specialty: "العيون" },
+        { name: "ليلى خالد", date: "2025-09-10", time: "09:00", specialty: "طب الأطفال" },
+        { name: "سارة محمود", date: "2025-09-12", time: "14:00", specialty: "الباطنية" }
+    ];
+
+    // دالة لعرض البيانات
+    function renderAppointments(list) {
+        const tbody = document.getElementById("appointmentTableBody");
+        tbody.innerHTML = ""; // مسح الجدول
+        list.forEach(app => {
+            const row = `<tr>
+                <td>${app.name}</td>
+                <td>${app.date}</td>
+                <td>${app.time}</td>
+                <td>${app.specialty}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+
+    // فلترة حسب البحث والتاريخ
+    function filterAppointments() {
+        const searchValue = document.getElementById("appointmentSearch").value.toLowerCase();
+        const dateValue = document.getElementById("appointmentDateFilter").value;
+
+        const filtered = appointments.filter(app => {
+            const matchName = app.name.toLowerCase().includes(searchValue);
+            const matchDate = !dateValue || app.date === dateValue;
+            return matchName && matchDate;
+        });
+
+        renderAppointments(filtered);
+    }
+
+    // ربط الأحداث
+    document.getElementById("appointmentSearch").addEventListener("input", filterAppointments);
+    document.getElementById("appointmentDateFilter").addEventListener("change", filterAppointments);
+
+    // عرض الكل عند التحميل
+    renderAppointments(appointments);
+</script>
+
+<script th:src="@{/js/components/header.js}"></script>
+<script th:src="@{/js/components/modal.js}"></script>
+<script th:src="@{/js/services/patientService.js}"></script>
+<script th:src="@{/js/doctorDashboard.js}"></script>
+
 </body>
 </html>

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Controller
@@ -30,5 +31,20 @@ public class DashboardController {
             return "doctor/doctorDashboard"; // Thymeleaf template
         }
         return "redirect:/login"; // إعادة التوجيه إذا لم يكن التوكن صالحاً
+    }
+    @GetMapping("/PacntrDashboard/{token}")
+    public String PacintDashboard(@PathVariable String token, Model model) {
+        if(authService.isTokenValid(token) && authService.getRoleFromToken(token).equals("PACHI")) {
+            model.addAttribute("token", token);
+            return "pacint/PacntrDashboard"; // Thymeleaf template
+        }
+        return "redirect:/login"; // إعادة التوجيه إذا لم يكن التوكن صالحاً
+    }
+    @GetMapping("/patient/search")
+    public String searchDoctor(@RequestParam String query, Model model) {
+        // هنا تقدر لاحقاً تجيب بيانات من قاعدة بيانات
+        // الآن مجرد مثال ثابت
+        model.addAttribute("query", query);
+        return "pacint/patientSearch";
     }
 }
